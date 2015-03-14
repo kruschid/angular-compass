@@ -1,0 +1,16 @@
+{
+  "name": "kruschidNav",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "angular": "1.2.25",
+    "angular-route": "1.2.25",
+    "bootstrap": "3.3.2"
+  },
+  "exportsOverride": {
+    "bootstrap": {
+      "fonts": "dist/fonts/*",
+      "css": "dist/css/*"
+    }
+  }
+}

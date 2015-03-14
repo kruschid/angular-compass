@@ -1,0 +1,58 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    title kruschidNav
+    link(href='lib/bootstrap/css/bootstrap.css', rel='stylesheet')
+  body(ng-app='kdNavApp')
+    //- Home Template
+    script(type='text/ng-template', id='home.html')
+      h1 Welcome to kdNav
+      strong Example: 
+      | kdNav.getLink('cities', {countryId: 1, cityId:7}) = '{{citiesLink}}''
+    //- Contact Template
+    script(type='text/ng-template', id='contact.html')
+      h1 Contact
+    //- Countries Template
+    script(type='text/ng-template', id='countries.html')
+      h1 Countries
+      div(kd-nav-menu='countriesMenu')
+        ul.nav.nav-tabs
+          li(ng-repeat='item in menu', ng-class='{active: item.active}')
+            a(kd-nav-link-target='{{item.routeName}}', 
+              kd-nav-link-params='item.params') {{item.label}}
+        ul.nav.nav-pills(ng-repeat='item in menu', ng-show='item.children && item.active')
+          li(ng-repeat='childItem in item.children', ng-class='{active: childItem.active}')
+            a(kd-nav-link-target='{{childItem.routeName}}', 
+              kd-nav-link-params='childItem.params') {{childItem.label}}
+    //- Main Template
+    .navbar.navbar-inverse(role='navigation')
+      .container
+        .navbar-header
+          button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse')
+            span.sr-only Toggle navigation
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+          a.navbar-brand(href='#') kruschidNav
+        .collapse.navbar-collapse
+          ul.nav.navbar-nav(kd-nav-menu='mainMenu')
+            li(ng-repeat='item in menu', ng-class='{active: item.active}')
+              a(kd-nav-link-target='{{item.routeName}}', 
+                kd-nav-link-params='item.params',
+                ng-if='!item.current') {{item.label}}
+              span(ng-if='item.current') {{item.label}}
+    .container
+      ol.breadcrumb(kd-nav-breadcrumbs)
+        li(ng-repeat='crumb in breadcrumbs', ng-class='{active:$last}')
+          a(kd-nav-link-target='{{crumb.routeName}}', 
+            kd-nav-link-params='crumb.params', 
+            ng-if='!$last') {{crumb.label}}
+          span(ng-if='$last') {{crumb.label}}
+      ng-view
+    script(src='lib/angular/angular.js')
+    script(src='lib/angular-route/angular-route.js')
+    script(src='javascripts/angular-kdnav.js')
+    script(src='javascripts/app.js')
