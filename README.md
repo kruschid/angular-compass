@@ -1,156 +1,191 @@
-## Verwendung
-### Routes & Menüs definieren
-    navConfig = ($routeProvider, kdNavProvider) ->
-      # configure routes
-      kdNavProvider.configRoutes $routeProvider,
-        home:
-          route: '/home'
-          label: 'Home'
-          templateUrl: 'home.html'
-          controller: 'HomeCtrl'
-          default: true
-        contact:
-          route: '/contact'
-          label: 'Contact'
-          templateUrl: 'contact.html'
-          controller: 'ContactCtrl'
-        countires: ...
-        cities: ...
-        shops: ...
-      # configure 
-      .configMenu 
-        # first menu
-        mainMenu: [
-          routeName: 'home'
-        ,
-          routeName: 'countries'
-        ,
-          routeName: 'contact'
-        ] # mainMenu
-        # second menu
-        countriesMenu: [
-          routeName: 'cities'
-          label: 'France'
-          params: {countryId: 6}
-        , 
-          routeName: 'cities'
-          label: 'Denmark'
-          params: {countryId: 10}
-        ,
-          routeName: 'cities'
-          label: 'Germany' # overwrite default label
-          params: {countryId: 1}
-          children: [
-            routeName: 'shops'
-            label: 'Trier'
-            params: {cityId: 1}
-          ,
-            routeName: 'shops'
-            label: 'Berlin'
-            params: {cityId: 2}
-          ] # germany-children
-        ] # countriesMenu 
+## How to Use
+First create a new angular app. Of course you could use your existing app as well.
 
-    angular.module('myApp', ['kdNav'])
-    .config(['$routeProvider', 'kdNavProvider', navConfig])
+	myApp = angular.module('myApp', ['kdNav'])
 
-You can define as many menus as you want.
+Now define your routes.
 
+	myApp.config(['kdNavProvider', (kdNavProvider) ->  
+	  # set up routes
+	  kdNavProvider.configRoutes
+	    home:
+	      route: '/'
+	      label: 'Home'
+	      templateUrl: 'admin.html'
+	    help:
+	      route: '/help/:pageId'
+	      label: 'Help'
+	      templateUrl: 'help.html'
+	      controller: 'HelpCtrl'
+	    contact:
+	      route: '/contact'
+	      label: 'Contact'
+	      templateUrl: 'contact.html'
+	    '404:
+	      route: '/404'
+	      templateUrl: '404.html'
+	]) # config
 
-### Link-Builder-Directive
-Now you can use the 'kd-link-builder' directive on anchor elements to generate href attribute by passing route name and params. Use the same route name as in the routes definitions.  
+Note that each route has a **route name**, e.g. `home` or `help `.
 
-    a(kd-nav-link-target='city', kd-nav-link-params='{countryId: 1, cityId: 7}') Shops
+Now we use route names for link generation:
 
-Will be compiled by angular to:
-      
-    a(href='#/countries/1/cities/7/shops') Shops
+	<a kd-nav-path='help' 
+	   kd-nav-params='{pageId:1}'>FAQ</a>
 
-### Breadcrumbs-Template
-Use `kd-nav-breadcrumbs` directive zo display breadcrumbs. You can pass the breadcrumbs template directly into the directive.
+To display breadcrumbs use the breadcrumbs directive. 
+Therefore pass the template directly into the directive.
 
-    ol.breadcrumb(kd-nav-breadcrumbs)
-      li(ng-repeat='crumb in breadcrumbs', ng-class='{active:$last}')
-        a(kd-nav-link-builder='{{crumb.routeName}}', 
-          kd-nav-link-params='crumb.params', 
-          ng-if='!$last') {{crumb.label}}
-        span(ng-if='$last') {{crumb.label}}
+	<ol kd-nav-breadcrumbs>
+	  <li ng-repeat='crumb in breadcrumbs' ng-class='{active:$last}'>
+	    <a kd-nav-path='{{crumb.routeName}}'
+	       kd-nav-params='crumb.params'>{{crumb.label}}</a>
+	  </li>
+	</ol>
 
-### Menu-Template
-Use the `kd-nav-menu` directive to display a menu. Note that you have to set the menu name as attribute value to generate the corresponding menu. You can pass the menu template directly into the directive. 
+Now we use route names to create the `mainMenu`:
 
-    div(kd-nav-menu='countriesMenu')
-      ul.nav.nav-tabs
-        li(ng-repeat='item in menu', ng-class='{active: item.active}')
-          a(kd-nav-link-builder='{{item.routeName}}', 
-            kd-nav-link-params='item.params') {{item.label}}
-      ul.nav.nav-pills(ng-repeat='item in menu', ng-show='item.children && item.active')
-        li(ng-repeat='childItem in item.children', ng-class='{active: childItem.active}')
-          a(kd-nav-link-builder='{{childItem.routeName}}', 
-            kd-nav-link-params='childItem.params') {{childItem.label}}
+	myApp.config(['kdNavProvider', (kdNavProvider) ->
+	  kdNavProvider.addMenu('mainMenu', [
+	      {routeName: 'help'}
+	      {routeName: 'contact'}
+	  ])
+	)
 
-### Link-Builder-Service & Breadcrumbs-Service
-To generate links within controllers or to change breadcrumb labels you can use the kdNav service:
+To display `mainMenu` use the menu directive and pass the template directly to it:
 
-    # defines controller
-    homeCtrl = ($scope, kdNav) ->
-      # generate link
-      $scope.cityLink = kdNav.getLink('city', {countryId: 1, cityId:7})
-      # change breadcrumbs-label
-      kdNav.getBreadcrumb('home').label = 'Welcome'
+	<ul kd-nav-menu='mainMenu'>
+	  <li ng-repeat='item in menu' ng-class='{active: item.active, current: item.current}'>
+	    <a kd-nav-path='{{item.routeName}}'
+	      kd-nav-params='item.params'>{{item.label}}</a>
+	  </li>
+	</ul>
 
-    # add controller to app
-    angular.module('myApp', ['kdNav'])
-    .controller('HomeCtrl', homeCtrl)
+## More About Breadcrumbs
+Breadcrumbs generation is based on the paths you defined within you config block by calling the `kdNavProvider.configRoutes` method. So if the contact-page shows *Home / Contact* as the current breadcrumbs then your home-path `/` is a substring of `/contact`.
 
+**Problem:** Breadcrumbs don't match my menu-structure.
 
-## Bekannte Probleme
+**Solution:** Breadcrumbs generation isn't based on the menu structure. 
+Instead route definitions specify how breadcrumbs will be nested. 
+For example `home.route = '/'` is a substring of `contact.route = '/contact'` 
+so the contact route is a child route of home. 
+This configuration generates *Home>Contact* as your breadcrumbs path if contact is current page.
 
-### Mehrere Elemente auf selben Menüeben sind aktiv
-**Problem:**
-In meinem Menü werden zwei Elemente gleichzeitig als Aktiv markiert, wie kann das sein?
+Another example: If we had the following menu structure:
 
-**Lösung:**
-Das liegt daran, dass ein Menüelement das Vaterelement des anderen ist und somit in dessen Pfad enthalten ist. 
-Beispielkonfiguration:
+	mainMenu: [{
+	  routeName: 'shops',
+	  children: [{routeName:'cities'}]
+	}] 
 
-    kdNavProvider.configRoutes $routeProvider,
-      home:
-        route: '/'
-        controller: 'HomeCtrl'
-      contact:
-        route: '/contact'
-        controller: 'ContactCtrl'
-    .configMenu
-      mainMenu: [
-        routeName: 'home'
-      ,
-        routeName: 'contact'
-      ]
+You may expect your breadcrumbs to be *Shops>Cities* when your current site is *Cities*.
+Instead according the route definitions your breadcrumbs is *Home>Counties>Cities*:
 
-Wenn man die Home-Route nicht verändern möchte, kann das Problem mit einem einfach Workaround umgangen werden. Zuerst legt ergänzt man die Routes um einen Alias für den Home-Eintrag und verweist ihn auf den selben Controller:
+	# Route definitions
+	home.route:      '/'
+	countries.route: '/countries'
+	cities.route:    '/countries/:countryId/cities'
 
-    homeAlias:
-      route: '/home'
-      controller: 'HomeCtrl'
+	# resulting in: 
+	# Home>Counties>Cities 
 
-### Breadcrumbs entsprechen nicht der Menüstruktur
-**Problem:** 
-Breadcrumbs entsprechen nicht meiner Menü-Struktur!
+**Problem:** How to pass params to breadcrumbs and how to modify breadcrumb-labels? 
 
-**Lösung:**
-Die Breadcrumbs werden nicht nach der Menü-Struktur erzeugt sondern auf Basis der Routes. 
+**Solution:**  You don't need explicitly pass params to breadcrumbs, 
+the module takes the values from `$routeParams` service.
+If you need to modify breadcrumbs you have to use the `kdNav` service.
 
-Beispiel-Menükonfiguration:
+	myApp.controller('HomeCtrl', ['$scope', 'kdNav', ($scope, kdNav) ->
+	  kdNav.getBreadcrumb('home').params = {id:123}
+	  kdNav.getBreadcrumb('home').label = 'Welcome'
+	])
 
-    Cities -> '/countries/:countryId/cities'
-      City -> '/cities/:cityId'
+## More About Menus
+There are two types of menus. The type of a menu depends on the place from where you define the menu. You can define a menu within a config block. That means the menu doesn't get deleted when you load another controller. You can also define a menu within a controller. If you pass your current `$scope` to the `kdNav.addMenu` method the menu will be destroyed like your controller on `$destroy`. If you don't pass the scope variabe to that method the menu remains in memory for the applications lifetime like you would have defined it in a config block. 
 
-Weil Cities-Pfad kein Teilstring vom City-Pfad ist, ist der Breadcrumbspfad nicht wie erwartet `Cities / City`, wenn man den City-Eintrag im Menü anklickt. Zudem kommt noch das Problem, dass der obere Menülink nicht generiert werden kann, wenn man den unteren Menüeintrag aufruft. Das kann passieren wenn der Parameter `:countryId` vom City-Controller weder in `$routeParams` vorhanden ist noch explizit definiert wird.
+	myApp.controller('HomeCtrl', ['$scope', 'kdNav', ($scope, kdNav) ->
+	  kdNav.addMenu('publicMenu', [
+	    {routeName:'publicPageOne'}
+	    {routeName:'publicPageTwo'}
+	  ], $scope)
+	])
 
-Auch hier dient ein Alias für die City-Route als einfacher Workaround:
+You can define as many menus as you need. You can overwrite a existing menu by using its name again while you pass a new menu object.
 
-    Cities -> '/countries/:countryId/cities'
-      CityAlias -> '/countries/:countryId/cities/:cityId'
+	kdNav.addMenu('publicMenu', [
+	  {routeName:'contact'}
+	  {routeName:'help'}
+	]) # don't need to pass scope again because $destroy-listener is already defined 
 
-Der Pfad von CitiyAlias is in diesem Fall konsistenter und ermöglicht eine korrekte Breadcrumbs-Generierung weil die übergeordnete Route ein Teilstring der untergeordneten ist. Der Parameter `:countryId` wird für den City-Controller nicht zwingend benötigt. Das Link-Builder-Modul erleichtert aber die Generierung der Verlinkungen. Es gewährleistet dass die Parameterwerte, welche nicht explizit gesetzt sind aus `$routeParams`verwendet werden, sofern sie vorhanden sind.
+You may want set parameter values and overwrite labels when you define a menu:
+
+	# group.route = '/groups/:groupId/users'
+	# user.route = '/groups/:groupId/users/:userId'
+	kdNavProvider.addMenu ('paramMenu', [
+	  {routeName:'group', label:'AngularJS', params:{groupId:1}, children:[
+	    {routeName:'user', label:'Wilhelm von Osten', params:{userId:1}}
+	    {routeName:'user', label:'Clever Hans', params:{userId:2}}
+	  ]}
+	])
+
+Note that children automaticly inherit parents parameters. That means that the params of the menu-item *Clever Hans* is actually `{groupId:1, userId:2}`. The children of that item would also have inherit those params.  
+
+**Problem:** Two items are displayed as active in my menu.
+
+**Solution:** You have added the parent item of the current site to the same menu-level. Because the parent element is within the current path it is displayed as active element.
+
+Note the following example. `home` is parent of `contact`but both are in the same menu.
+If `contact` is the current page both menu items will be displayed as active.  
+
+	home.route ='/' # is substring of contact.route
+	contact.route = '/contact'
+	kdNavProvider.addMenu('mainMenu',[
+	    {routeName:'home', ...}
+	    {routeName:'contact', ...} 
+	  ]
+
+A good workaround is to create the route `homeAlias` wich inherit controller and templateUrl from `home`:
+
+	kdNavProvider.configRoutes 
+	  ...
+	  homeAlias:  {route:'/home',    extends: 'home', ...}
+	.configMenu
+	  mainMenu: [
+	    {routeName:'homeAlias', ...}
+	    {routeName:'contact', ...} 
+	  ]
+
+##More about Links
+
+**Problem:** The breadcrumbs concept is handy. A component is parent of antoher
+component if its routepath is a substring of the others components routepath.
+But it is too time-consuming to pass so many route-params to `kd-nav-path` directive.
+
+**Solution:** You don't need to do that. The link-directive takes automatically 
+values from `$routeParams`.
+
+In the following example you may want to have `cities` as parent of `shops`.
+but you may not need the `countryId` param in your `shops`-controller.
+
+	cities.route = '/countries/:countryId/cities'
+	shops.route = '/countries/:countryId/cities/:cityId/shops'
+
+So you may think you have to pass the `countryId`-param in your controller to your template:
+
+	<a kd-nav-path='shops' 
+	   kd-nav-params='{countryId:$scope.countryId, shopId:$scope.cityId}'>...</a>
+
+But in fact you can leave parameters you don't want to modify. 
+The directive takes autmatically values from `$routeParams`-service.
+
+**Problem:** I want to create links in a controller.
+
+**Solution:** Use `kdNav`-service.
+
+	myApp.controller('HomeCtrl', ['$scope', 'kdNav', ($scope, kdNav) ->
+	  $scope.shopsLink = kdNav.createPath('shops', {countryId: 1, cityId:7})
+	])
+
+##More Examples
+For more examples clone/download this repository and open [dist/index.html](dist/index.html). Or read the code API in [src/coffeescript/angular-kdnav.coffee](src/coffeescript/angular-kdnav.coffee) 

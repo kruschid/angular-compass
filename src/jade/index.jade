@@ -6,27 +6,99 @@ html(lang='en')
     meta(name='viewport', content='width=device-width, initial-scale=1')
     title kruschidNav
     link(href='lib/bootstrap/css/bootstrap.css', rel='stylesheet')
-  body(ng-app='kdNavApp')
+  body(ng-app='myApp')
     //- Home Template
     script(type='text/ng-template', id='home.html')
-      h1 Welcome to kdNav
-      strong Example: 
-      | kdNav.getLink('cities', {countryId: 1, cityId:7}) = '{{citiesLink}}''
-    //- Contact Template
-    script(type='text/ng-template', id='contact.html')
-      h1 Contact
-    //- Countries Template
-    script(type='text/ng-template', id='countries.html')
-      h1 Countries
-      div(kd-nav-menu='countriesMenu')
+      h1 Welcome to kdNav 
+      h4 Config
+
+      h4 Change Breadcrumb-Label
+      pre kdNav.getBreadcrumb('home').label = 'Welcome'
+      h4 Generate Link:
+      pre # adminUserEdit.route: '/admin/groups/:groupId/users/:userId'
+        | 
+        | kdNav.createPath('adminUserEdit', {groupId: 1, userId:7})
+        | # returns '{{adminUserEditLink}}'
+      p
+        | Klick to try: 
+        a(kd-nav-path='adminUserEdit', kd-nav-params='{groupId: 1, userId:7}') {{adminUserEditLink}}
+    //- Public Template
+    script(type='text/ng-template', id='public.html')
+      h1 Overview
+      h3 Example
+      ul.nav.nav-tabs(kd-nav-menu='publicMenu')
+        li(ng-repeat='item in menu', ng-class='{active: item.active}')
+          a(kd-nav-path='{{item.routeName}}', 
+            kd-nav-params='item.params') {{item.label}}
+      h4 Config
+      pre publicPageOne:
+        |   route: '/public/pageone'
+        |   label: 'Page One'
+        |   extend: 'public'
+        | publicPageTwo:
+        |   route: '/public/pagetwo'
+        |   label: 'Page Two'
+        |   extend: 'public'
+      h4 Controller
+      pre kdNav.addMenu('publicMenu', [
+        |   {routeName:'publicPageOne'}
+        |   {routeName:'publicPageTwo'}
+        | ], $scope) 
+      h4 Jade-Template
+      pre(ng-non-bindable)  ul(kd-nav-menu='publicMenu')
+        |   li(ng-repeat='item in menu', ng-class='{active: item.active}')
+        |     a(kd-nav-path='{{item.routeName}}', 
+        |       kd-nav-params='item.params') {{item.label}}
+    //- Admin Template
+    script(type='text/ng-template', id='admin.html')
+      h1 Admin
+      h3 Example
+      div(kd-nav-menu='adminMenu')
         ul.nav.nav-tabs
           li(ng-repeat='item in menu', ng-class='{active: item.active}')
-            a(kd-nav-link-target='{{item.routeName}}', 
-              kd-nav-link-params='item.params') {{item.label}}
+            a(kd-nav-path='{{item.routeName}}', 
+              kd-nav-params='item.params') {{item.label}}
         ul.nav.nav-pills(ng-repeat='item in menu', ng-show='item.children && item.active')
           li(ng-repeat='childItem in item.children', ng-class='{active: childItem.active}')
-            a(kd-nav-link-target='{{childItem.routeName}}', 
-              kd-nav-link-params='childItem.params') {{childItem.label}}
+            a(kd-nav-path='{{childItem.routeName}}', 
+              kd-nav-params='childItem.params') {{childItem.label}}
+      h4 Config
+      pre adminSettings:
+        |   route: '/admin/settings'
+        |   label: 'Settings'
+        |   extend: 'admin'
+        | adminGroups:
+        |   route: '/admin/groups'
+        |   label: 'Organize Groups'
+        |   extend: 'admin' 
+        | adminUsers:
+        |   route: '/admin/groups/:groupId/users'
+        |   label: 'Organize Users'
+        |   extend: 'admin'
+      h4 Controller
+      pre kdNav.addMenu('adminMenu', [
+        |   {routeName:'adminSettings'}
+        |   {routeName:'adminGroups', children:[
+        |     {routeName:'adminUsers', label:'Users', params:{groupId:1}}
+        |     {routeName:'adminUsers', label:'Admins', params:{groupId:2}}
+        |   ]} # adminGroups-children
+        | ], $scope)
+      h4 Jade-Template
+      pre(ng-non-bindable) div(kd-nav-menu='adminMenu')
+        |   ul.nav.nav-tabs
+        |     li(ng-repeat='item in menu', ng-class='{active: item.active}')
+        |       a(kd-nav-path='{{item.routeName}}', 
+        |         kd-nav-params='item.params') {{item.label}}
+        |   ul.nav.nav-pills(ng-repeat='item in menu', ng-show='item.children && item.active')
+        |     li(ng-repeat='childItem in item.children', ng-class='{active: childItem.active}')
+        |       a(kd-nav-path='{{childItem.routeName}}', 
+        |         kd-nav-params='childItem.params') {{childItem.label}}
+    //- Help Tempalte
+    script(type='text/ng-template', id='help.html')
+      h1 Help
+    //- 404 Template
+    script(type='text/ng-template', id='404.html')
+      h1 404 - Not found :-(
     //- Main Template
     .navbar.navbar-inverse(role='navigation')
       .container
@@ -36,23 +108,22 @@ html(lang='en')
             span.icon-bar
             span.icon-bar
             span.icon-bar
-          a.navbar-brand(href='#') kruschidNav
+          a.navbar-brand(kd-nav-path='home', kd-nav-params='{groupId: 1, userId:7}') kruschidNav
         .collapse.navbar-collapse
           ul.nav.navbar-nav(kd-nav-menu='mainMenu')
-            li(ng-repeat='item in menu', ng-class='{active: item.active}')
-              a(kd-nav-link-target='{{item.routeName}}', 
-                kd-nav-link-params='item.params',
-                ng-if='!item.current') {{item.label}}
-              span(ng-if='item.current') {{item.label}}
+            li(ng-repeat='item in menu', ng-class='{active:item.active}')
+              a(kd-nav-path='{{item.routeName}}', 
+                kd-nav-params='item.params') {{item.label}}
     .container
       ol.breadcrumb(kd-nav-breadcrumbs)
         li(ng-repeat='crumb in breadcrumbs', ng-class='{active:$last}')
-          a(kd-nav-link-target='{{crumb.routeName}}', 
-            kd-nav-link-params='crumb.params', 
+          a(kd-nav-path='{{crumb.routeName}}', 
+            kd-nav-params='crumb.params', 
             ng-if='!$last') {{crumb.label}}
           span(ng-if='$last') {{crumb.label}}
       ng-view
     script(src='lib/angular/angular.js')
     script(src='lib/angular-route/angular-route.js')
     script(src='javascripts/angular-kdnav.js')
+    //- script(src='javascripts/angular-kdnav.min.js')
     script(src='javascripts/app.js')

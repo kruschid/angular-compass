@@ -1,7 +1,8 @@
 {
-  "name": "kruschidNav",
+  "name": "kruschid-nav",
   "version": "0.0.1",
   "private": true,
+  "main": "dist/javascripts/angular-kdnav.js",
   "dependencies": {
     "angular": "1.2.25",
     "angular-route": "1.2.25",

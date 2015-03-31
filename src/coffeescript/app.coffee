@@ -1,88 +1,99 @@
-navConfig = ($routeProvider, kdNavProvider) ->
+###*
+# @ngdoc overview
+# @name readme
+# @description
+# # Test
+###
+myApp = angular.module('myApp', ['kdNav'])
+
+myApp.config(['kdNavProvider', (kdNavProvider) ->  
   # set up routes
-  kdNavProvider.configRoutes $routeProvider,
+  kdNavProvider.configRoutes
     home:
       route: '/'
       label: 'Home'
       templateUrl: 'home.html'
       controller: 'HomeCtrl'
+    help:
+      route: '/help'
+      label: 'Help'
+      templateUrl: 'help.html'
+    '404':
+      route: '/404'
+      template: '404.html'
       default: true
-    countries:
-      route: '/countries'
-      label: 'Countries'
-      templateUrl: 'countries.html'
-      controller: 'CountriesCtrl'
-    cities:
-      route: '/countries/:countryId/cities'
-      label: 'Cities'
-      templateUrl: 'countries.html'
-      controller: 'CitiesCtrl'
-    shops:
-      route: '/countries/:countryId/cities/:cityId/shops'
-      label: 'Shops'
-      templateUrl: 'countries.html'
-      controller: 'ShopsCtrl'
-    shopDetails:
-      route: '/countries/:countryId/cities/:cityId*/shops/:shopId?'
-      label: 'Shop-Details'
-      templateUrl: 'countries.html'
-      controller: 'ShopDetailsCtrl'
-    contact:
-      route: '/contact'
-      label: 'Contact'
-      templateUrl: 'contact.html'
-      controller: 'ContactCtrl'
-  # set up navigation tree
-  .configMenu 
-    mainMenu: [
-      routeName: 'countries'
-    ,
-      routeName: 'contact'
-    ] # mainMenu
-    countriesMenu: [
-      routeName: 'cities'
-      label: 'France'
-      params: {countryId: 6}
-    , 
-      routeName: 'cities'
-      label: 'Denmark'
-      params: {countryId: 10}
-    ,
-      routeName: 'cities'
-      label: 'Germany' # overwrite default label
-      params: {countryId: 1}
-      children: [
-        routeName: 'shops'
-        label: 'Trier'
-        params: {cityId: 1}
-      ,
-        routeName: 'shops'
-        label: 'Berlin'
-        params: {cityId: 2}
-      ] # germany-children
-    ] # subMenu 
+    # public routes
+    public:
+      route: '/public'
+      label: 'Public'
+      templateUrl: 'public.html'
+      controller: 'PublicCtrl'
+    publicPageOne:
+      route: '/public/pageone'
+      label: 'Page One'
+      extend: 'public'
+    publicPageTwo:
+      route: '/public/pagetwo'
+      label: 'Page Two'
+      extend: 'public'
+    # admin routes
+    admin:
+      route: '/admin'
+      label: 'Admin'
+      forward: 'adminSettings'
+      params: {param:'test123'} # pass params when replace current path
+    adminSettings:
+      route: '/admin/settings/:param'
+      label: 'Settings'
+      templateUrl: 'admin.html'
+      controller: 'AdminCtrl'
+    adminGroups:
+      route: '/admin/groups'
+      label: 'Organize Groups'
+      extend: 'adminSettings' 
+    adminUsers:
+      route: '/admin/groups/:groupId/users'
+      label: 'Organize Users'
+      extend: 'adminSettings'
+    adminUserEdit:
+      route: '/admin/groups/:groupId/users/:userId'
+      label: 'Edit User'
+      extend: 'adminSettings'
+  # set up static navigation tree
+  .addMenu('mainMenu',[
+    {routeName:'public'}
+    {routeName:'admin'}
+    {routeName:'help'}
+  ]) # mainMenu
+]) # config
 
-homeController = ($scope, kdNav) ->
+myApp.controller('HomeCtrl', ['$scope', 'kdNav', ($scope, kdNav) ->
+  console.log 'HomeCtrl'
   # generate link
-  $scope.citiesLink = kdNav.getLink('cities', {countryId: 1, cityId:7})
+  $scope.adminUserEditLink = kdNav.createPath('adminUserEdit', {groupId:1, userId:7})
   # change breadcrumbs-label
   kdNav.getBreadcrumb('home').label = 'Welcome'
+])
 
-countriesController = ($scope) ->
+myApp.controller('PublicCtrl', ['$scope', 'kdNav', ($scope, kdNav) -> 
+  console.log 'PublicCtrl'
+  # define menu
+  items = [
+    {routeName:'publicPageOne'}
+    {routeName:'publicPageTwo'}
+  ] # items
+  kdNav.addMenu('publicMenu', items) # addMenu
+])
 
-citiesController = ($scope) ->
-
-shopsController = ($scope) ->
-
-shopDetailsController = ($scope) ->
-
-contactController = ($scope) ->
-
-angular.module('kdNavApp', ['kdNav'])
-.config(['$routeProvider', 'kdNavProvider', navConfig])
-.controller('HomeCtrl', ['$scope', 'kdNav', homeController])
-.controller('CountriesCtrl', countriesController)
-.controller('CitiesCtrl', ['$scope', citiesController])
-.controller('ShopsCtrl', ['$scope', shopsController])
-.controller('ShopDetailsCtrl', ['$scope', shopDetailsController])
-.controller('ContactCtrl', ['$scope', contactController])
+myApp.controller('AdminCtrl', ['$scope', 'kdNav', ($scope, kdNav) -> 
+  console.log 'AdminCtrl'
+  # define menu
+  items = [
+    {routeName:'adminSettings'}
+    {routeName:'adminGroups', children:[
+      {routeName:'adminUsers', label:'Users', params:{groupId:1}}
+      {routeName:'adminUsers', label:'Admins', params:{groupId:2}}
+    ]}
+  ] # items
+  kdNav.addMenu('adminMenu', items, $scope) # addMenu
+])

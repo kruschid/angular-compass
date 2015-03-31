@@ -1,110 +1,146 @@
-(function() {
-  var citiesController, contactController, countriesController, homeController, navConfig, shopDetailsController, shopsController;
 
-  navConfig = function($routeProvider, kdNavProvider) {
-    return kdNavProvider.configRoutes($routeProvider, {
-      home: {
-        route: '/',
-        label: 'Home',
-        templateUrl: 'home.html',
-        controller: 'HomeCtrl',
-        "default": true
-      },
-      countries: {
-        route: '/countries',
-        label: 'Countries',
-        templateUrl: 'countries.html',
-        controller: 'CountriesCtrl'
-      },
-      cities: {
-        route: '/countries/:countryId/cities',
-        label: 'Cities',
-        templateUrl: 'countries.html',
-        controller: 'CitiesCtrl'
-      },
-      shops: {
-        route: '/countries/:countryId/cities/:cityId/shops',
-        label: 'Shops',
-        templateUrl: 'countries.html',
-        controller: 'ShopsCtrl'
-      },
-      shopDetails: {
-        route: '/countries/:countryId/cities/:cityId*/shops/:shopId?',
-        label: 'Shop-Details',
-        templateUrl: 'countries.html',
-        controller: 'ShopDetailsCtrl'
-      },
-      contact: {
-        route: '/contact',
-        label: 'Contact',
-        templateUrl: 'contact.html',
-        controller: 'ContactCtrl'
-      }
-    }).configMenu({
-      mainMenu: [
-        {
-          routeName: 'countries'
-        }, {
-          routeName: 'contact'
+/**
+ * @ngdoc overview
+ * @name readme
+ * @description
+ * # Test
+ */
+
+(function() {
+  var myApp;
+
+  myApp = angular.module('myApp', ['kdNav']);
+
+  myApp.config([
+    'kdNavProvider', function(kdNavProvider) {
+      return kdNavProvider.configRoutes({
+        home: {
+          route: '/',
+          label: 'Home',
+          templateUrl: 'home.html',
+          controller: 'HomeCtrl'
+        },
+        help: {
+          route: '/help',
+          label: 'Help',
+          templateUrl: 'help.html'
+        },
+        '404': {
+          route: '/404',
+          template: '404.html',
+          "default": true
+        },
+        "public": {
+          route: '/public',
+          label: 'Public',
+          templateUrl: 'public.html',
+          controller: 'PublicCtrl'
+        },
+        publicPageOne: {
+          route: '/public/pageone',
+          label: 'Page One',
+          extend: 'public'
+        },
+        publicPageTwo: {
+          route: '/public/pagetwo',
+          label: 'Page Two',
+          extend: 'public'
+        },
+        admin: {
+          route: '/admin',
+          label: 'Admin',
+          forward: 'adminSettings',
+          params: {
+            param: 'test123'
+          }
+        },
+        adminSettings: {
+          route: '/admin/settings/:param',
+          label: 'Settings',
+          templateUrl: 'admin.html',
+          controller: 'AdminCtrl'
+        },
+        adminGroups: {
+          route: '/admin/groups',
+          label: 'Organize Groups',
+          extend: 'adminSettings'
+        },
+        adminUsers: {
+          route: '/admin/groups/:groupId/users',
+          label: 'Organize Users',
+          extend: 'adminSettings'
+        },
+        adminUserEdit: {
+          route: '/admin/groups/:groupId/users/:userId',
+          label: 'Edit User',
+          extend: 'adminSettings'
         }
-      ],
-      countriesMenu: [
+      }).addMenu('mainMenu', [
         {
-          routeName: 'cities',
-          label: 'France',
-          params: {
-            countryId: 6
-          }
+          routeName: 'public'
         }, {
-          routeName: 'cities',
-          label: 'Denmark',
-          params: {
-            countryId: 10
-          }
+          routeName: 'admin'
         }, {
-          routeName: 'cities',
-          label: 'Germany',
-          params: {
-            countryId: 1
-          },
+          routeName: 'help'
+        }
+      ]);
+    }
+  ]);
+
+  myApp.controller('HomeCtrl', [
+    '$scope', 'kdNav', function($scope, kdNav) {
+      console.log('HomeCtrl');
+      $scope.adminUserEditLink = kdNav.createPath('adminUserEdit', {
+        groupId: 1,
+        userId: 7
+      });
+      return kdNav.getBreadcrumb('home').label = 'Welcome';
+    }
+  ]);
+
+  myApp.controller('PublicCtrl', [
+    '$scope', 'kdNav', function($scope, kdNav) {
+      var items;
+      console.log('PublicCtrl');
+      items = [
+        {
+          routeName: 'publicPageOne'
+        }, {
+          routeName: 'publicPageTwo'
+        }
+      ];
+      return kdNav.addMenu('publicMenu', items);
+    }
+  ]);
+
+  myApp.controller('AdminCtrl', [
+    '$scope', 'kdNav', function($scope, kdNav) {
+      var items;
+      console.log('AdminCtrl');
+      items = [
+        {
+          routeName: 'adminSettings'
+        }, {
+          routeName: 'adminGroups',
           children: [
             {
-              routeName: 'shops',
-              label: 'Trier',
+              routeName: 'adminUsers',
+              label: 'Users',
               params: {
-                cityId: 1
+                groupId: 1
               }
             }, {
-              routeName: 'shops',
-              label: 'Berlin',
+              routeName: 'adminUsers',
+              label: 'Admins',
               params: {
-                cityId: 2
+                groupId: 2
               }
             }
           ]
         }
-      ]
-    });
-  };
-
-  homeController = function($scope, kdNav) {
-    $scope.citiesLink = kdNav.getLink('cities', {
-      countryId: 1,
-      cityId: 7
-    });
-    return kdNav.getBreadcrumb('home').label = 'Welcome';
-  };
-
-  countriesController = function($scope) {};
-
-  citiesController = function($scope) {};
-
-  shopsController = function($scope) {};
-
-  shopDetailsController = function($scope) {};
-
-  contactController = function($scope) {};
-
-  angular.module('kdNavApp', ['kdNav']).config(['$routeProvider', 'kdNavProvider', navConfig]).controller('HomeCtrl', ['$scope', 'kdNav', homeController]).controller('CountriesCtrl', countriesController).controller('CitiesCtrl', ['$scope', citiesController]).controller('ShopsCtrl', ['$scope', shopsController]).controller('ShopDetailsCtrl', ['$scope', shopDetailsController]).controller('ContactCtrl', ['$scope', contactController]);
+      ];
+      return kdNav.addMenu('adminMenu', items, $scope);
+    }
+  ]);
 
 }).call(this);

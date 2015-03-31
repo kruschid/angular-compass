@@ -35,6 +35,22 @@ module.exports = (grunt) ->
         dest: 'dist/javascripts'
         ext: '.js'
     #
+    # documentation generator
+    dgeni:
+      options:
+        basePath: './dist/javascripts'
+      src: ['angular-kdnav.js']
+      dest: 'api'
+    #
+    # uglify
+    uglify:
+      options:
+        compress:
+          drop_console: true
+      kdNav:
+        files:
+          'dist/javascripts/angular-kdnav.min.js': ['dist/javascripts/angular-kdnav.js']
+    #
     # watch
     watch:
       jade:
@@ -43,24 +59,17 @@ module.exports = (grunt) ->
       coffee:
         files: ['src/coffeescript/*.coffee']
         tasks: ['coffee'] 
+      # dgeni:
+      #   files: ['dist/javascripts/angular-kdnav.js']
+      #   tasks: ['dgeni']
       livereload:
-        files: ['dist/**/*']
+        files: ['dist/**/*', 'doc/**/*']
         options:
           livereload: true
-    #
-    # connect server
-    connect:
-      server:
-        options:
-          port: 9000
-          base: 'dist'
 
   grunt.loadNpmTasks('grunt-contrib-jade')
   grunt.loadNpmTasks('grunt-contrib-coffee')
   grunt.loadNpmTasks('grunt-contrib-watch')
   grunt.loadNpmTasks('grunt-bower-task')
-  grunt.loadNpmTasks('grunt-contrib-connect')
-
-  grunt.registerTask('install', ['bower:install'])
-  grunt.registerTask('compile', ['install', 'jade', 'coffee'])
-  grunt.registerTask('run', ['connect', 'watch'])
+  grunt.loadNpmTasks('grunt-dgeni')
+  grunt.loadNpmTasks('grunt-contrib-uglify')
