@@ -3,7 +3,7 @@ Just open the terminal and run:
 
 	bower install angular-kdnav --save
 	
-Or add `"angular-kdnav":"0.2.0"` to your dependencies in `bower.json`.
+Or add `"angular-kdnav":"0.3.0"` to your dependencies in `bower.json`.
 
 ## How to Use
 First create a new angular app. Of course you could use your existing app as well.
