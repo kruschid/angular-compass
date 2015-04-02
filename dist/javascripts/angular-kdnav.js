@@ -131,7 +131,7 @@
        */
       this._menus._add = function(menuName, menuItems) {
         if (this[menuName]) {
-          console.log('warning:', menuName, 'is already defined');
+          console.log("Warning: '" + menuName + "' already defined. (kdNavProvider._menus._add)");
         }
         this[menuName] = {
           prepared: false,
@@ -153,9 +153,14 @@
        * * configure routes by inserting them to $routeProvider
        * * configure 'default' route for the case that any routes don't match a request
        */
-      this.configRoutes = function(_routes) {
+      this.addRoutes = function(_routes) {
         var extend, routeName;
-        this._routes = _routes;
+        for (routeName in _routes) {
+          if (this._routes[routeName]) {
+            console.log("Warning: '" + routeName + "' already defined. (kdNavProvider.addRoutes)");
+          }
+          this._routes[routeName] = _routes[routeName];
+        }
         for (routeName in this._routes) {
           extend = this._routes[routeName].extend;
           if (extend) {
@@ -294,7 +299,7 @@
       }).call(this)) {
         return item;
       }
-      return console.log('no route entry for', routeName);
+      return console.log("Warning: no route entry for '" + routeName + "'. (kdNav.getBreadcrumb)");
     };
 
     /**
@@ -450,7 +455,7 @@
     this.getMenu = function(menuName) {
       var menu;
       if (!_menus[menuName]) {
-        console.log(menuName, 'does not yet exist');
+        console.log("Warning: '" + menuName + "' does not yet exist (kdNav.getMenu)");
       }
       menu = _menus[menuName];
       if (!menu.prepared) {
@@ -523,7 +528,7 @@
         }
         return "" + route;
       }
-      return console.log('no route entry for', routeName);
+      return console.log("Warning: no route entry for '" + routeName + "'. (kdNav.createPath)");
     };
 
     /**

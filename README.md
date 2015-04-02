@@ -12,9 +12,9 @@ First create a new angular app. Of course you could use your existing app as wel
 
 Now define your routes.
 
-	myApp.config(['kdNavProvider', (kdNavProvider) ->  
+	myApp.add(['kdNavProvider', (kdNavProvider) ->  
 	  # set up routes
-	  kdNavProvider.configRoutes
+	  kdNavProvider.addRoutes
 	    home:
 	      route: '/'
 	      label: 'Home'
@@ -28,7 +28,7 @@ Now define your routes.
 	      route: '/contact'
 	      label: 'Contact'
 	      templateUrl: 'contact.html'
-	    '404:
+	    '404':
 	      route: '/404'
 	      templateUrl: '404.html'
 	]) # config
@@ -69,7 +69,7 @@ To display `mainMenu` use the menu directive and pass the template directly to i
 	</ul>
 
 ## More About Breadcrumbs
-Breadcrumbs generation is based on the paths you defined within you config block by calling the `kdNavProvider.configRoutes` method. So if the contact-page shows *Home / Contact* as the current breadcrumbs then your home-path `/` is a substring of `/contact`.
+Breadcrumbs generation is based on the paths you defined within you config block by calling the `kdNavProvider.addRoutes` method. So if the contact-page shows *Home / Contact* as the current breadcrumbs then your home-path `/` is a substring of `/contact`.
 
 **Problem:** Breadcrumbs don't match my menu-structure.
 
@@ -154,7 +154,7 @@ If `contact` is the current page both menu items will be displayed as active.
 
 A good workaround is to create the route `homeAlias` wich inherit controller and templateUrl from `home`:
 
-	kdNavProvider.configRoutes 
+	kdNavProvider.addRoutes 
 	  ...
 	  homeAlias:  {route:'/home',    extends: 'home', ...}
 	.configMenu

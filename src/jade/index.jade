@@ -28,7 +28,7 @@ html(lang='en')
         li(ng-repeat='item in menu', ng-class='{active: item.active}')
           a(kd-nav-path='{{item.routeName}}', 
             kd-nav-params='item.params') {{item.label}}
-      h4 Config
+      h4 Routes
       pre publicPageOne:
         |   route: '/public/pageone'
         |   label: 'Page One'
@@ -60,7 +60,7 @@ html(lang='en')
           li(ng-repeat='childItem in item.children', ng-class='{active: childItem.active}')
             a(kd-nav-path='{{childItem.routeName}}', 
               kd-nav-params='childItem.params') {{childItem.label}}
-      h4 Config
+      h4 Routes
       pre adminSettings:
         |   route: '/admin/settings'
         |   label: 'Settings'

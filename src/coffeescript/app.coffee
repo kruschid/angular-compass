@@ -8,7 +8,7 @@ myApp = angular.module('myApp', ['kdNav'])
 
 myApp.config(['kdNavProvider', (kdNavProvider) ->  
   # set up routes
-  kdNavProvider.configRoutes
+  kdNavProvider.addRoutes
     home:
       route: '/'
       label: 'Home'

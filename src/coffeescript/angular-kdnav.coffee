@@ -128,7 +128,10 @@ kdNavModule.provider('kdNav', ['$routeProvider', ($routeProvider) ->
   # Setter for {@link kdNavProvider#_menus}
   ###
   @_menus._add = (menuName, menuItems) ->
-    console.log 'warning:', menuName, 'is already defined' if @[menuName]
+    # output warning if item already available
+    if @[menuName]
+      console.log "Warning: '#{menuName}' already defined. (kdNavProvider._menus._add)"
+    # add menu to menu object
     @[menuName] =
       prepared: false
       parsed: false
@@ -147,7 +150,14 @@ kdNavModule.provider('kdNav', ['$routeProvider', ($routeProvider) ->
   # * configure routes by inserting them to $routeProvider
   # * configure 'default' route for the case that any routes don't match a request  
   ###
-  @configRoutes = (@_routes) ->
+  @addRoutes = (_routes) ->
+    # copy each route config
+    for routeName of _routes
+      # warn if route already exists
+      if @_routes[routeName]
+        console.log "Warning: '#{routeName}' already defined. (kdNavProvider.addRoutes)"
+      # copy route conf
+      @_routes[routeName] = _routes[routeName]
     # register routes
     for routeName of @_routes
       extend = @_routes[routeName].extend
@@ -263,8 +273,10 @@ KdNav = ($rootScope, $route, $routeParams, $location, _routes, _menus) ->
   # @returns {Object|undefined}
   ###
   @getBreadcrumb = (routeName) ->
+    # return item
     return item if item.routeName is routeName for item in @getBreadcrumbs()
-    console.log 'no route entry for', routeName
+    # or print warning
+    console.log "Warning: no route entry for '#{routeName}'. (kdNav.getBreadcrumb)"
 
   ###*
   # @ngdoc method
@@ -388,7 +400,10 @@ KdNav = ($rootScope, $route, $routeParams, $location, _routes, _menus) ->
   # @returns {Object|undefined}
   ###
   @getMenu = (menuName) ->
-    console.log menuName, 'does not yet exist' if not _menus[menuName]
+    # if menu doesnt exist
+    if not _menus[menuName]
+      console.log "Warning: '#{menuName}' does not yet exist (kdNav.getMenu)"
+    # get the menu 
     menu = _menus[menuName]
     # prepare menu if not yet prepared
     if not menu.prepared
@@ -451,7 +466,7 @@ KdNav = ($rootScope, $route, $routeParams, $location, _routes, _menus) ->
       route = _routes[routeName].route
       route = route.replace(":#{key}", value) for key, value of params
       return "#{route}"
-    console.log 'no route entry for', routeName
+    console.log "Warning: no route entry for '#{routeName}'. (kdNav.createPath)"
 
   ###*
   # Bind Listener

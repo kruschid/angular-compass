@@ -13,7 +13,7 @@
 
   myApp.config([
     'kdNavProvider', function(kdNavProvider) {
-      return kdNavProvider.configRoutes({
+      return kdNavProvider.addRoutes({
         home: {
           route: '/',
           label: 'Home',
