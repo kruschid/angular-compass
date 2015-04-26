@@ -8,62 +8,54 @@ module.exports = (grunt) ->
       install:
         options:
           layout: 'byComponent'
-          targetDir: 'dist/lib'
-          cleanTargetDir: true
-          #cleanup: true # both cleanBowerDir & cleanTargetDir are set to the value of cleanup.
+          targetDir: "demo/lib"
+          cleanup: true # both cleanBowerDir & cleanTargetDir are set to the value of cleanup.
     #
     # jade
     jade:
       compile:
-        optins:
+        options:
           pretty: true
-        files: [{
-          cwd: 'src/jade'
-          src: '*.jade'
-          dest: 'dist'
-          ext: '.html' 
-          expand: true
-        }]
+        files:
+          'demo/index.html': 'demo/jade/*.jade'
     #
     # coffeescript
     coffee:
       compile:
-        expand: true
-        flatten: true
-        cwd: 'src/coffeescript'
-        src: ['*.coffee']
-        dest: 'dist/javascripts'
-        ext: '.js'
+        files: {
+          'demo/js/app.js': 'demo/coffee/*.coffee'
+          'src/js/angular-compass.js': 'src/coffee/*.coffee'
+        }
     #
     # documentation generator
-    dgeni:
-      options:
-        basePath: './dist/javascripts'
-      src: ['angular-kdnav.js']
-      dest: 'api'
+    # dgeni:
+    #   options:
+    #     basePath: './dist/javascripts'
+    #   src: ['angular-kdnav.js']
+    #   dest: 'api'
     #
     # uglify
     uglify:
       options:
         compress:
-          drop_console: true
+          drop_console: true # remove console warnings: every command starts with console.*
       kdNav:
         files:
-          'dist/javascripts/angular-kdnav.min.js': ['dist/javascripts/angular-kdnav.js']
+          'src/js/angular-compass.min.js': ['src/js/angular-compass.js']
     #
     # watch
     watch:
       jade:
-        files: ['src/jade/*.jade']
+        files: ['demo/jade/*']
         tasks: ['jade']
       coffee:
-        files: ['src/coffeescript/*.coffee']
+        files: ['src/coffee/*', 'demo/coffee/*']
         tasks: ['coffee'] 
       # dgeni:
       #   files: ['dist/javascripts/angular-kdnav.js']
       #   tasks: ['dgeni']
       livereload:
-        files: ['dist/**/*', 'doc/**/*']
+        files: ['src/js/*', 'demo/js/*', 'demo/*']
         options:
           livereload: true
 
@@ -71,5 +63,5 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks('grunt-contrib-coffee')
   grunt.loadNpmTasks('grunt-contrib-watch')
   grunt.loadNpmTasks('grunt-bower-task')
-  grunt.loadNpmTasks('grunt-dgeni')
+  #grunt.loadNpmTasks('grunt-dgeni')
   grunt.loadNpmTasks('grunt-contrib-uglify')

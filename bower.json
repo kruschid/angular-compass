@@ -1,6 +1,6 @@
 {
-  "name": "angular-kdNav",
-  "description": "Breadcrumbs, navigations, menus and linking-directives for AngularJS 1.2/1.3",
+  "name": "angular-compass",
+  "description": "breadcrumbs, navigations, menus and linking-directives for AngularJS 1.2/1.3",
   "keywords": [
     "angular",
     "navigation",
@@ -13,11 +13,11 @@
   "ignore": [
     "/.*",
     "Gruntfile.json",
-    "package.json"
+    "package.json",
+    "demo"
   ],
   "main": [
-    "dist/javascripts/angular-kdnav.js",
-    "dist/javascripts/angular-kdnav.min.js"
+    "src/js/angular-compass.js"
   ],
   "dependencies": {
     "angular": "1.2 - 1.3",
@@ -30,6 +30,7 @@
     "bootstrap": {
       "fonts": "dist/fonts/*",
       "css": "dist/css/*"
-    }
+    },
+    "jquery": {}
   }
 }

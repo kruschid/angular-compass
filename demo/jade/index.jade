@@ -1,0 +1,207 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    title ngCompass demo
+    link(href='lib/bootstrap/css/bootstrap.css', rel='stylesheet')
+  body(ng-app='myApp')
+    //- Home Template
+    script(type='text/ng-template', id='home.html')
+      h2 ngCompass demo 
+      h4 Demos
+      ul(ng-compass-menu='mainMenu')
+        li(ng-repeat='item in menu')
+          a(ng-compass-path='{{item.routeName}}', ng-compass-params='item.params') {{item.label}}
+      h4 How we did define the menu above
+      h5 Jade
+      pre(ng-non-bindable) ul(ng-compass-menu='mainMenu')
+        |   li(ng-repeat='item in menu')
+        |     a(ng-compass-path='{{item.routeName}}', ng-compass-params='item.params') {{item.label}}
+      h5 Coffee (Routes) 
+      pre ngCompassProvider.addRoutes(
+        |   breadcrumbs: 
+        |     route: '/breadcrumbs'
+        |     label: 'Breadcrumbs'
+        |   links:
+        |     route: '/links'
+        |     label: 'Links'
+        |   menus:
+        |     route: '/menus'
+        |     label: 'Menus'
+        | )
+      h5 Coffee (Menu)
+      pre ngCompassProvider.addMenu('mainMenu',[
+        |   {routeName:'breadcrumbs'}
+        |   {routeName:'links'}
+        |   {routeName:'menus'}
+        | ])
+
+    //- Breadcrumbs Template
+    script(type='text/ng-template', id='breadcrumbs.html')
+      h2 ngCompass breadcrumbs
+      h4 Routes
+      pre ngCompassProvider.addRoutes
+        |   home:
+        |     route: '/'
+        |     label: 'Home'
+        |   breadcrumbs: 
+        |     route: '/breadcrumbs'
+        |     label: 'Breadcrumbs'
+        |   links:
+        |     route: '/links'
+        |     label: 'Links'
+        |   menus:
+        |     route: '/menus'
+        |     label: 'Menus'
+      p In this Example the 'home' route is displayed as the parent of the current page 'breacrumbs'. 
+        | It is because the 'home' route is a substring of the 'breadcrumbs' route. ('/' is substring of '/breadcrumbs')
+      p It is very handy because you don't need a explicit configuration of the hierarchical order. 
+        | Just define your routes according to this convention.
+        | This even works with parameters!
+        | You can find a example with parameters in the  
+        a(ng-compass-path='menus') menus section
+        |.
+      h4 Template
+      p To display breadcrumbs just pass your template to the breadcrumbs directive:
+      pre(ng-non-bindable) ol.breadcrumb(ng-compass-breadcrumbs)
+        |   li(ng-repeat='crumb in breadcrumbs', ng-class='{active:$last}')
+        |     a(ng-if='!$last', ng-compass-path='{{crumb.routeName}}', ng-compass-params='crumb.params') {{crumb.label}}
+        |     span(ng-if='$last') {{crumb.label}}
+      h4 Manipulate breadcrumb
+      pre # change breadcrumb label
+        | ngCompass.getBreadcrumb('home').label = 'Welcome'
+        | 
+        | # add/change param
+        | ngCompass.getBreadcrumb('home').params.search = 'Alan Turing'
+    //- Links Template
+    script(type='text/ng-template', id='links.html')
+      h2 ngCompass links
+      h4 Generate a link
+      h5 Coffee
+      pre error:
+        |   route: '/error/:code'
+        |   ...
+      h5 Jade
+      pre
+        | a(ng-compass-path='error', 
+        |   ng-compass-params='{code: 501}') Error 501 - Not implemented
+      p Result: 
+        a(ng-compass-path='error', ng-compass-params='{code: 501}') Error 501 - Not implemented 
+      h4 Generate link within controller
+      h5 Coffee
+      pre # subSubMenus.route: '/menus/:menuId/:subMenuId'
+        | 
+        | ngCompass.createPath('subSubMenus', {menuId: 1, subMenuId:7, searchABC:'#kung/foo/bar?a=foo&amp;b=bar'})
+        | 
+        | # Returns '{{path}}'
+      h5 Jade
+      pre(ng-non-bindable) a(ng-href='\#{{path}}') {{path}}
+      p Result: 
+        a(ng-href='\#{{path}}') {{path}}
+      h4 Missing param warning
+      h5 Jade
+      pre a(ng-compass-path='subSubMenus', ng-compass-params='{menuId: 1}')
+      p The route requires two params but only one is passed to the directive.
+        | The directive tries to read the value from $routeParams but finally shows the following warning in the console:
+      h5 Console
+      pre Warning: subMenuId is undefined for route name: subSubMenus. Route: /menus/:menuId/:subMenuId. (ngCompass.createPath)
+      a(ng-compass-path='subSubMenus', ng-compass-params='{menuId: 1}') I Caused the warning!
+      h4 Missing route warning 
+      h5 Jade
+      pre a(ng-compass-path='notDefined')
+      p Causes Warning because the route doesn't exist:
+      h5 Console
+      pre Warning: no route entry for 'notDefined'. (ngCompass.createPath)
+      a(ng-compass-path='notDefined') I don't exist!
+    //- Menus Template
+    script(type='text/ng-template', id='menus.html')
+      h1 Overview
+      h3 Example
+      div(ng-compass-menu='extraMenu')
+        ul.nav.nav-tabs
+          li(ng-repeat='item in menu', ng-class='{active: item.active}')
+            a(ng-compass-path='{{item.routeName}}', 
+              ng-compass-params='item.params') {{item.label}}
+        ul.nav.nav-pills(ng-repeat='item in menu', ng-show='item.children && item.active')
+          li(ng-repeat='childItem in item.children', ng-class='{active: childItem.active}')
+            a(ng-compass-path='{{childItem.routeName}}', 
+              ng-compass-params='childItem.params') {{childItem.label}}
+      h4 Routes
+      pre menus:
+        |   route: '/menus'
+        |   label: 'Menus'
+        |   templateUrl: 'menus.html'
+        |   controller: 'MenusCtrl'
+        | subMenus:
+        |   route: '/menus/:menuId'
+        |   label: 'Submenu'
+        |   inherit: 'menus'
+        | subSubMenus:
+        |   route: '/menus/:menuId/:subMenuId'
+        |   label: 'Subsubmenu'
+        |   inherit: 'menus'
+      p Here we define the routes. We are able to inherit properties from other routes. Of course we can use any of angulars $routeProvider properties to define our routes. 
+        | The label-property defines the default label that will be displayed in menus and breadcrumbs.
+      h4 Controller
+      pre items = [
+        |   {routeName:'subMenus', params:{menuId: 1}, children:[
+        |     {routeName:'subSubMenus', params:{subMenuId: 1}}
+        |   ]}
+        |   {routeName:'subMenus', params:{menuId: 2}, children:[
+        |     {routeName:'subSubMenus', params:{subMenuId:2}}
+        |     {routeName:'subSubMenus', label:'Overwritten Label', params:{subMenuId:3}}
+        |   ]}
+        | ]
+        | ngCompass.addMenu('extraMenu', items, $scope)
+      p Note that the label-property overwrite the default label-property in the route definition.
+        | It will overwrite the breadcrumbs label-property as well.
+      p We also have passed the current $scope to invoke automatic deletion when controller gets destroyed. You can leave the last parameter to avoid this behavior.
+      p Of course it is also possible to create a menu within a config block via ngCompassProvider:
+      pre ngCompassProvider.addMenu('mainMenu',[
+        |   {routeName:'breadcrumbs'}
+        |   {routeName:'links'}
+        |   {routeName:'menus'}
+        | ]) # mainMenu
+      h4 Jade-Template
+      pre(ng-non-bindable) div(ng-compass-menu='extraMenu')
+        |   ul.nav.nav-tabs
+        |     li(ng-repeat='item in menu', ng-class='{active: item.active}')
+        |       a(ng-compass-path='{{item.routeName}}', ng-compass-params='item.params') {{item.label}}
+        |   ul.nav.nav-pills(ng-repeat='item in menu', ng-show='item.children && item.active')
+        |     li(ng-repeat='childItem in item.children', ng-class='{active: childItem.active}')
+        |       a(ng-compass-path='{{childItem.routeName}}', ng-compass-params='childItem.params') {{childItem.label}}
+    //- 404 Template
+    script(type='text/ng-template', id='error.html')
+      h2 Error! ({{code}})
+      h4 My controller:
+      pre ngCompass.getBreadcrumb('error').label = "Error \#{$routeParams.code}" 
+        | $scope.code = $routeParams.code
+    //- Main Template
+    .navbar.navbar-inverse(role='navigation')
+      .container
+        .navbar-header
+          button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse')
+            span.sr-only Toggle navigation
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+          a.navbar-brand(ng-compass-path='home') angular-compass
+        .collapse.navbar-collapse
+          ul.nav.navbar-nav(ng-compass-menu='mainMenu')
+            li(ng-repeat='item in menu', ng-class='{active:item.active}')
+              a(ng-compass-path='{{item.routeName}}', 
+                ng-compass-params='item.params') {{item.label}}
+    .container
+      ol.breadcrumb(ng-compass-breadcrumbs)
+        li(ng-repeat='crumb in breadcrumbs', ng-class='{active:$last}')
+          a(ng-compass-path='{{crumb.routeName}}', 
+            ng-compass-params='crumb.params', 
+            ng-if='!$last') {{crumb.label}}
+          span(ng-if='$last') {{crumb.label}}
+      ng-view
+    script(src='lib/angular/angular.js')
+    script(src='lib/angular-route/angular-route.js')
+    script(src='../src/js/angular-compass.js')
+    script(src='js/app.js')

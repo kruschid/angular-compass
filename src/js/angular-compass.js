@@ -1,9 +1,9 @@
 
 /**
  * @ngdoc module
- * @name kdNav
+ * @name ngCompass
  * @description
- * # kdNav Module
+ * # ngCompass Module
  * ## Features
  * * Extended route features
  * * Breadcrumbs generation
@@ -15,41 +15,45 @@
  */
 
 (function() {
-  var KdNav, kdNavModule;
+  var NgCompass, ngCompassModule;
 
-  kdNavModule = angular.module('kdNav', ['ngRoute']);
+  ngCompassModule = angular.module('ngCompass', ['ngRoute']);
 
 
   /**
    * @ngdoc provider
-   * @name kdNavProvider
+   * @name ngCompassProvider
    * @requires $routeProvider
-   * @returns {kdNavProvider} Returns reference to kdNavProvider
+   * @returns {ngCompassProvider} Returns reference to ngCompassProvider
    * @description 
    * Provides setters for routes- and method configuration
    */
 
-  kdNavModule.provider('kdNav', [
+  ngCompassModule.provider('ngCompass', [
     '$routeProvider', function($routeProvider) {
 
       /**
        * @ngdoc property
-       * @name kdNavProvider#_routes
+       * @name ngCompassProvider#_routes
        * @description
        * Contains route config. Each route is mapped to route name.
        *
        * **Route-Format:**
-       * ```
-       * <routeName>: # for referencing in menu, breadcrumbs and path-directive you must define a routeName
-       *   route: <route-string> 
-       *   templateUrl: <tempalteUrl>
-       *   controller: <controllerName>
-       *   label: <label-string> # label will be used by breadcrumbs and menu directive 
-       *   default: <true|false> # if true this route will be used if no route matches the current request 
-       *   extend: <routeName of other route> # inherit properties except the default property from other route
-       *   forward: <routeName of other route> # automatically forward to other route
-       *   params: <params object> # here you can pass params for the route referencing by forward property
-       * ```
+       *
+       *   <routeName>: # for referencing in menu, breadcrumbs and path-directive you must define a routeName
+       *     route: <route-string> 
+       *     label: <label-string> # label will be used by breadcrumbs and menu directive 
+       *     default: <true|false> # if true this route will be used if no route matches the current request 
+       *     inherit: <routeName of other route> # inherit properties except the default property from other route
+       *     
+       *     ... $routeProvider.when() options. e.g.:  
+       *    
+       *     templateUrl: <tempalteUrl>
+       *     controller: <controllerName>
+       *     redirectTo: <path>
+       *
+       *     ... more $routeProvider options ...   
+       *
        *
        * **Example:**
        * ```
@@ -63,7 +67,7 @@
        *   info:
        *     route: '/info/:command'
        *     label: 'Info'
-       *     extend: 'home' # inherit properties from home-route
+       *     inherit: 'home' # inherit properties from home-route
        *   baseInfo:
        *     route: '/info'
        *     label: 'Info'
@@ -75,7 +79,7 @@
 
       /**
        * @ngdoc property
-       * @name kdNavProvider#_menus
+       * @name ngCompassProvider#_menus
        * @description
        * Contains menu-tree
        *
@@ -86,7 +90,7 @@
        *   parsed: <true|false>        # true means that menu tree was parsed for active elements
        *   items: [
        *     {
-       *       routeName: <routeName>  # routeName to reference a route in route configuration {@link kdNavProvider#_routes}
+       *       routeName: <routeName>  # routeName to reference a route in route configuration {@link ngCompassProvider#_routes}
        *       label: <label-string>   # overwrite label defined in route-config (optional, doesn't affect labels displayed in breadcrumbs)
        *       params: <params-object> # parameter should be used for path generation (optional)
        *       children: [             # children and childrens children
@@ -104,8 +108,8 @@
        * **Example:**
        * ```
        * _menus.mainMenu =
-       *   prepared: false # true after menu was pass to {@link kdNav#_prepareMenu} 
-       *   parsed: false # true after passing mainMenu to {@link kdNav#_parseMenu} and again false on $routeChangeSuccess
+       *   prepared: false # true after menu was pass to {@link ngCompass#_prepareMenu} 
+       *   parsed: false # true after passing mainMenu to {@link ngCompass#_parseMenu} and again false on $routeChangeSuccess
        *   items: [
        *     {routeName:'admin', children:[
        *       {routeName:'groups', children:[
@@ -122,16 +126,16 @@
 
       /**
        * @ngdoc method
-       * @name kdNavProvider#_menus._add
+       * @name ngCompassProvider#_menus._add
        * @param {string} menuName Name of menu
-       * @param {Object} menuItems See {@link kdNavProvider#_menus}
-       * @returns {kdNavProvider#_menus} 
+       * @param {Object} menuItems See {@link ngCompassProvider#_menus}
+       * @returns {ngCompassProvider#_menus} 
        * @description
-       * Setter for {@link kdNavProvider#_menus}
+       * Setter for {@link ngCompassProvider#_menus}
        */
       this._menus._add = function(menuName, menuItems) {
         if (this[menuName]) {
-          console.log("Warning: '" + menuName + "' already defined. (kdNavProvider._menus._add)");
+          console.log("Warning: '" + menuName + "' already defined. (ngCompassProvider._menus._add)");
         }
         this[menuName] = {
           prepared: false,
@@ -143,9 +147,9 @@
 
       /**
        * @ngdoc method
-       * @name kdNavProvider#configRoutes
-       * @param {Object} _routes See {@link kdNavProvider#_routes}
-       * @returns {kdNavProvider} Chainable Method returns reference to kdNavProvider.
+       * @name ngCompassProvider#configRoutes
+       * @param {Object} _routes See {@link ngCompassProvider#_routes}
+       * @returns {ngCompassProvider} Chainable Method returns reference to ngCompassProvider.
        * @description
        * Loops over each route definition to:
        * * implement inheritence of routes 
@@ -154,26 +158,25 @@
        * * configure 'default' route for the case that any routes don't match a request
        */
       this.addRoutes = function(_routes) {
-        var extend, routeName;
+        var inherit, routeName;
         for (routeName in _routes) {
           if (this._routes[routeName]) {
-            console.log("Warning: '" + routeName + "' already defined. (kdNavProvider.addRoutes)");
-          }
-          this._routes[routeName] = _routes[routeName];
-        }
-        for (routeName in this._routes) {
-          extend = this._routes[routeName].extend;
-          if (extend) {
-            this._routes[routeName] = angular.extend({}, this._routes[extend], this._routes[routeName]);
-            if (this._routes[extend]["default"]) {
-              this._routes[routeName]["default"] = false;
+            console.log("Warning: '" + routeName + "' already defined. (ngCompassProvider.addRoutes)");
+          } else {
+            inherit = _routes[routeName].inherit;
+            if (_routes[inherit] != null) {
+              _routes[routeName] = angular.extend({}, _routes[inherit], _routes[routeName]);
+              if (_routes[inherit]["default"]) {
+                _routes[routeName]["default"] = false;
+              }
+            } else if (inherit != null) {
+              console.log("Warning: " + routeName + " can't inherit from " + inherit + ". Not able to found " + inherit + ". (ngCompassProvider.addRoutes)");
             }
-          }
-          $routeProvider.when(this._routes[routeName].route, this._routes[routeName]);
-          if (this._routes[routeName]["default"]) {
-            $routeProvider.otherwise({
-              redirectTo: this._routes[routeName].route
-            });
+            $routeProvider.when(_routes[routeName].route, _routes[routeName]);
+            if (_routes[routeName]["default"]) {
+              $routeProvider.otherwise(_routes[routeName]);
+            }
+            this._routes[routeName] = _routes[routeName];
           }
         }
         return this;
@@ -181,12 +184,12 @@
 
       /**
        * @ngdoc method
-       * @name kdNavProvider#addMenu
+       * @name ngCompassProvider#addMenu
        * @param {string} menuName Name of menu
-       * @param {Object} menuItems See {@link kdNavProvider#_menus}
-       * @returns {kdNavProvider} Chainable Method returns reference to kdNavProvider.
+       * @param {Object} menuItems See {@link ngCompassProvider#_menus}
+       * @returns {ngCompassProvider} Chainable Method returns reference to ngCompassProvider.
        * @description
-       * Setter for {@link kdNavProvider#_menus}
+       * Setter for {@link ngCompassProvider#_menus}
        */
       this.addMenu = function(menuName, menuItems) {
         this._menus._add(menuName, menuItems);
@@ -195,15 +198,15 @@
 
       /**
        * @ngdoc property
-       * @name kdNavProvider#$get
+       * @name ngCompassProvider#$get
        * @description
-       * Creates dependency-injection array to create KdNav instance.
-       * Passes therefore {@link kdNavProvider#_routes} 
-       * and {@link kdNavProvider#_menus} to KdNav.
+       * Creates dependency-injection array to create NgCompass instance.
+       * Passes therefore {@link ngCompassProvider#_routes} 
+       * and {@link ngCompassProvider#_menus} to NgCompass.
        */
       this.$get = [
         '$rootScope', '$route', '$routeParams', '$location', function($rootScope, $route, $routeParams, $location) {
-          return new KdNav($rootScope, $route, $routeParams, $location, this._routes, this._menus);
+          return new NgCompass($rootScope, $route, $routeParams, $location, this._routes, this._menus);
         }
       ];
       return this;
@@ -213,25 +216,25 @@
 
   /**
    * @ngdoc type
-   * @name KdNav
+   * @name NgCompass
    * @param {Object} $rootScope 
    * @param {Object} $route
    * @param {Object} $routeParams
-   * @param {Object} _routes Contains the {@link kdNavProvider#_routes 'routes object'}
-   * @param {Object} _menus Contains the {@link kdNavProvider#_menus 'menu object'}
+   * @param {Object} _routes Contains the {@link ngCompassProvider#_routes 'routes object'}
+   * @param {Object} _menus Contains the {@link ngCompassProvider#_menus 'menu object'}
    * @description
-   * Type of {@link kdNav 'kdNav-service'}
+   * Type of {@link ngCompass 'ngCompass-service'}
    */
 
 
   /**
    * @ngdoc service
-   * @name kdNav
+   * @name ngCompass
    * @requires $rootScope 
    * @requires $route
    * @requires $routeParams
-   * @requires kdNavProvider#_routes
-   * @requires kdNavProvider#_menus
+   * @requires ngCompassProvider#_routes
+   * @requires ngCompassProvider#_menus
    * @description
    * Regenerates breadcrumbs-array on route-change.
    * Provides interface methods to access and modify breadcrumbs elements.
@@ -242,19 +245,19 @@
    * Can be injected into other Angular Modules
    */
 
-  KdNav = function($rootScope, $route, $routeParams, $location, _routes, _menus) {
+  NgCompass = function($rootScope, $route, $routeParams, $location, _routes, _menus) {
 
     /**
      * @ngdoc property
-     * @name kdNav#_breadcrumbs
+     * @name ngCompass#_breadcrumbs._path
      * @description
      * Contains breadcrumbs
      * 
      * **Format:**
      * ```
-     * routeName: <routeName>  # routeName to reference a route in route configuration {@link kdNavProvider#_routes} 
-     * label: <label-string>   # copy of the default label from route configuration {@link kdNavProvider#_routes} 
-     * params: <param object>  # params automatically inserted from $routeParams but can be modified from any controller with {@link kdNav#getBreadcrumb}
+     * routeName: <routeName>  # routeName to reference a route in route configuration {@link ngCompassProvider#_routes} 
+     * label: <label-string>   # copy of the default label from route configuration {@link ngCompassProvider#_routes} 
+     * params: <param object>  # params automatically inserted from $routeParams but can be modified from any controller with {@link ngCompass#getBreadcrumb}
      * ```
      *
      * **Example:**
@@ -268,50 +271,19 @@
      * # corresponds to '/groups/1/users'
      *```
      */
-    this._breadcrumbs = [];
+    this._breadcrumbs = {};
+    this._breadcrumbs._path = [];
 
     /**
      * @ngdoc method
-     * @name kdNav#getBreadcrumbs
-     * @returns {Array} {@link kdNav#_breadcrumbs 'breadcrumbs array'}
-     */
-    this.getBreadcrumbs = function() {
-      return this._breadcrumbs;
-    };
-
-    /**
-     * @ngdoc method
-     * @name kdNav#getBreadcrumb
-     * @param {string} routeName A route-name to reference a route from {@link kdNavProvider#_routes}
-     * @returns {Object|undefined}
-     */
-    this.getBreadcrumb = function(routeName) {
-      var item;
-      if ((function() {
-        var _i, _len, _ref, _results;
-        _ref = this.getBreadcrumbs();
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          item = _ref[_i];
-          _results.push(item.routeName === routeName);
-        }
-        return _results;
-      }).call(this)) {
-        return item;
-      }
-      return console.log("Warning: no route entry for '" + routeName + "'. (kdNav.getBreadcrumb)");
-    };
-
-    /**
-     * @ngdoc method
-     * @name kdNav#_addBreadcrumb
-     * @param {String} route Route-string, e.g. '/citites/:cityId/shops/:shopId'
-     * @param {Object} params Route-params, e.g. {cityId:5, shopId:67}
-     * @returns {kdNav} Chainable method
+     * @name ngCompass#_breadcrumbs._add
+     * @param {String} routeName Routename-string, e.g. '/citites/:cityId/shops/:shopId'
+     * @returns {ngCompass} Chainable method
      * @description
-     * Adds one breadcrumb
+     * Finds routeName for route-string passed as param.
+     * Adds routeName and corresponding label to {@link ngCompass#_breadcrumbs 'breadcrumbs array'}
      */
-    this._addBreadcrumb = function(route, params) {
+    this._breadcrumbs._add = function(route) {
       var conf, rn, routeName;
       for (rn in _routes) {
         conf = _routes[rn];
@@ -320,10 +292,10 @@
         }
       }
       if (routeName) {
-        this._breadcrumbs.push({
+        this._path.push({
           routeName: routeName,
           label: _routes[routeName].label,
-          params: params
+          params: {}
         });
       }
       return this;
@@ -331,7 +303,34 @@
 
     /**
      * @ngdoc method
-     * @name kdNav#_generateBreadcrumbs
+     * @name ngCompass#getBreadcrumbs
+     * @returns {Array} {@link ngCompass#_breadcrumbs 'breadcrumbs array'}
+     */
+    this.getBreadcrumbs = function() {
+      return this._breadcrumbs._path;
+    };
+
+    /**
+     * @ngdoc method
+     * @name ngCompass#getBreadcrumb
+     * @param {string} routeName A route-name to reference a route from {@link ngCompassProvider#_routes}
+     * @returns {Object|undefined}
+     */
+    this.getBreadcrumb = function(routeName) {
+      var breadcrumb, _i, _len, _ref;
+      _ref = this.getBreadcrumbs();
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        breadcrumb = _ref[_i];
+        if (breadcrumb.routeName === routeName) {
+          return breadcrumb;
+        }
+      }
+      return console.log("Warning: no route entry for '" + routeName + "'. (ngCompass.getBreadcrumb)");
+    };
+
+    /**
+     * @ngdoc method
+     * @name ngCompass#_generateBreadcrumbs
      * @description
      * Thanks to Ian Walter: 
      * https://github.com/ianwalter/ng-breadcrumbs/blob/development/src/ng-breadcrumbs.js
@@ -339,11 +338,11 @@
      * * Deletes all breadcrumbs.
      * * Splits current path-string to create a set of path-substrings.
      * * Compares each path-substring with configured routes.
-     * * Matches then will be inserted into the current {@link kdNav#_breadcrumbs 'breadcrumbs-path').
+     * * Matches then will be inserted into the current {@link ngCompass#_breadcrumbs 'breadcrumbs-path').
      */
     this._generateBreadcrumbs = function() {
       var element, routeElements, testRoute, testRouteElements, _i, _len, _results;
-      this._breadcrumbs = [];
+      this._breadcrumbs._path = [];
       testRouteElements = [];
       routeElements = $route.current.originalPath.split('/');
       if (routeElements[1] === '') {
@@ -354,15 +353,15 @@
         element = routeElements[_i];
         testRouteElements.push(element);
         testRoute = testRouteElements.join('/') || '/';
-        _results.push(this._addBreadcrumb(testRoute, $routeParams));
+        _results.push(this._breadcrumbs._add(testRoute));
       }
       return _results;
     };
 
     /**
      * @ngdoc method
-     * @name kdNav#_prepareMenu
-     * @param {Array} menuItems {@link kdNavProvider#_menus}
+     * @name ngCompass#_prepareMenu
+     * @param {Array} menuItems {@link ngCompassProvider#_menus}
      * @param {Object} parentParams
      * @description
      * * Converts all params to string.
@@ -394,7 +393,7 @@
 
     /**
      * @ngdoc method
-     * @name kdNav#_parseMenu
+     * @name ngCompass#_parseMenu
      * @param {Array} menuItems The menu items (see {@link kNavProvider#_menus}) 
      * @description
      * Traverses menu-tree and finds current menu item 
@@ -417,7 +416,7 @@
           item = menuItems[_i];
           item.active = item.current = false;
           breadcrumbsIndex = void 0;
-          _this._breadcrumbs.map(function(bc, k) {
+          _this._breadcrumbs._path.map(function(bc, k) {
             if (bc.routeName === item.routeName) {
               return breadcrumbsIndex = k + 1;
             }
@@ -432,6 +431,9 @@
           }
           if (breadcrumbsIndex && paramsEquals) {
             item.active = true;
+            if (item.label != null) {
+              _this._breadcrumbs._path[breadcrumbsIndex - 1].label = item.label;
+            }
             if (breadcrumbsIndex === _this.getBreadcrumbs().length) {
               item.current = true;
             }
@@ -448,14 +450,15 @@
 
     /**
      * @ngdoc method
-     * @name kdNav#getMenu
+     * @name ngCompass#getMenu
      * @param {string} menuName Name of menu to return.
      * @returns {Object|undefined}
      */
     this.getMenu = function(menuName) {
       var menu;
       if (!_menus[menuName]) {
-        console.log("Warning: '" + menuName + "' does not yet exist (kdNav.getMenu)");
+        console.log("Warning: '" + menuName + "' does not yet exist (ngCompass.getMenu)");
+        return;
       }
       menu = _menus[menuName];
       if (!menu.prepared) {
@@ -471,16 +474,16 @@
 
     /**
      * @ngdoc method
-     * @name kdNav#addMenu
+     * @name ngCompass#addMenu
      * @param {string} menuName Name of the menu
-     * @param {Array} menuItems {@link kdNavProvider#_menus}
+     * @param {Array} menuItems {@link ngCompassProvider#_menus}
      * @param {$scope} [$scope=false] Pass $scope if you want the menu to be deleted autmoatically on $destroy-event
-     * @returns {kdNav}
+     * @returns {ngCompass}
      * @descripton
      * Method to add dynamic menu from controllers
      * The $routeChangeSuccess event is fired before a menu can be passed throug this method,
-     * so {@link kdNav#_parseMenu} must be called directly after the menu gets prepared
-     * by {@link kdNav#_prepareMenu}.
+     * so {@link ngCompass#_parseMenu} must be called directly after the menu gets prepared
+     * by {@link ngCompass#_prepareMenu}.
      * Creates a new child of $scope to delete the menu when controller get destroyed.
      * It could get expensive because generate menu
      */
@@ -504,48 +507,70 @@
 
     /**
      * @ngdoc method
-     * @name kdNav#createPath
+     * @name ngCompass#createPath
      * @param {String} routeName Routename, e.g. 'citites'
-     * @param {Object} params Parameter object, e.g. {countryId:5,citityId:19,shopId:1}
+     * @param {Object} [paramsOrig={}] Parameter object, e.g. {countryId:5,citityId:19,shopId:1}
      * @return {String|undefined} Anchor, e.g. e.g. '#countries/5/citites/19/shops/1' or undefined if routeName is invalid   
      * @description
      * Finds route by its routeName and returns its routePath with passed param values.
-     * Example:
+     * Performs fallback to $routeParams if the param-object passed as argument doesn't contain the required param(s)
+     *
+     * ** Example: **
      * ```
      * adminUserEdit.route = '/admin/groups/:groupId/users/:userId'
      *
-     * kdNav.createPath('adminUserEdit', {groupId: 1, userId:7})
-     * # returns '/admin/groups/1/users/7'
+     * ngCompass.createPath('adminUserEdit', {groupId: 1, userId:7, search:'hello'})
+     * # returns '/admin/groups/1/users/7?search=hello'
      * ```
      */
-    this.createPath = function(routeName, params) {
-      var key, route, value;
+    this.createPath = function(routeName, paramsOrig) {
+      var params, replacer, route;
+      if (paramsOrig == null) {
+        paramsOrig = {};
+      }
+      params = angular.copy(paramsOrig);
       if (_routes[routeName]) {
         route = _routes[routeName].route;
-        for (key in params) {
-          value = params[key];
-          route = route.replace(":" + key, value);
+
+        /**
+         * @param {string} match full placeholder, e.g. :path*, :id, :search?
+         * @param {string} paramName param name, e.g. path, id, search
+         * @description
+         * perfoms replacement of plaveholder in routestring
+         * removes params were replaced
+         */
+        replacer = function(match, paramName) {
+          var value, _ref;
+          value = (_ref = params[paramName]) != null ? _ref : $routeParams[paramName];
+          if (value != null) {
+            if (params[paramName] != null) {
+              delete params[paramName];
+            }
+            return encodeURIComponent(value);
+          }
+          console.log("Warning: " + paramName + " is undefined for route name: " + routeName + ". Route: " + route + ". (ngCompass.createPath)");
+          return match;
+        };
+        route = route.replace(/(?::(\w+)(?:[\?\*])?)/g, replacer);
+        if (!angular.equals(params, {})) {
+          route += '?' + Object.keys(params).map(function(k) {
+            return "" + k + "=" + (encodeURIComponent(params[k]));
+          }).join('&');
         }
-        return "" + route;
+        return route;
       }
-      return console.log("Warning: no route entry for '" + routeName + "'. (kdNav.createPath)");
+      return console.log("Warning: no route entry for '" + routeName + "'. (ngCompass.createPath)");
     };
 
     /**
      * Bind Listener
-     * Creates breadcrumbs-generator-function and binds it to route-change-event
+     * generates breadcrumbs
+     * and sets all menus as not parsed
      */
     $rootScope.$on('$routeChangeSuccess', (function(_this) {
       return function() {
-        var conf, menuName, params, routeName, _results;
+        var menuName, _results;
         if ($route.current.originalPath) {
-          for (routeName in _routes) {
-            conf = _routes[routeName];
-            if (conf.route === $route.current.originalPath && conf.forward) {
-              params = angular.extend({}, $routeParams, conf.params);
-              $location.path(_this.createPath(conf.forward, params));
-            }
-          }
           _this._generateBreadcrumbs();
           _results = [];
           for (menuName in _menus) {
@@ -561,14 +586,14 @@
 
   /**
    * @ngdoc directive
-   * @name kdNavBreadcrumbs
+   * @name ngCompassBreadcrumbs
    * @restrict AE
    * @description
    * Dislpays Breadcrumbs
    */
 
-  kdNavModule.directive('kdNavBreadcrumbs', [
-    'kdNav', function(kdNav) {
+  ngCompassModule.directive('ngCompassBreadcrumbs', [
+    'ngCompass', function(ngCompass) {
       var directive;
       directive = {
         restrict: 'AE',
@@ -579,9 +604,9 @@
             return el.append(clonedTranscludedTemplate);
           });
           return scope.$watch(function() {
-            return kdNav.getBreadcrumbs();
+            return ngCompass.getBreadcrumbs();
           }, function() {
-            return scope.breadcrumbs = kdNav.getBreadcrumbs();
+            return scope.breadcrumbs = ngCompass.getBreadcrumbs();
           });
         }
       };
@@ -592,30 +617,30 @@
 
   /**
    * @ngdoc directive
-   * @name kdNavMenu
+   * @name ngCompassMenu
    * @restrict AE
-   * @property {string} kdNavMenu name of menu to display
+   * @property {string} ngCompassMenu name of menu to display
    * @description
    * Displays a menu
    */
 
-  kdNavModule.directive('kdNavMenu', [
-    'kdNav', function(kdNav) {
+  ngCompassModule.directive('ngCompassMenu', [
+    'ngCompass', function(ngCompass) {
       var directive;
       directive = {
         restrict: 'AE',
         transclude: true,
         scope: {
-          menuName: '@kdNavMenu'
+          menuName: '@ngCompassMenu'
         },
         link: function(scope, el, attrs, ctrl, transcludeFn) {
           transcludeFn(scope, function(clonedTranscludedTemplate) {
             return el.append(clonedTranscludedTemplate);
           });
           return scope.$watch(function() {
-            return kdNav.getMenu(scope.menuName);
+            return ngCompass.getMenu(scope.menuName);
           }, function() {
-            return scope.menu = kdNav.getMenu(scope.menuName);
+            return scope.menu = ngCompass.getMenu(scope.menuName);
           });
         }
       };
@@ -626,11 +651,11 @@
 
   /**
    * @ngdoc directive
-   * @name kdNavPath
+   * @name ngCompassPath
    * @restrict A
    * @element a
-   * @property {string} kdNavPath name of menu to display
-   * @property {object=} kdNavParams name of menu to display
+   * @property {string} ngCompassPath name of menu to display
+   * @property {object=} ngCompassParams name of menu to display
    * @description
    * Linkbuilder directive generates path and puts it as value in href attribute on anchor tag.
    * Path geneartion depends on routeName and params.
@@ -642,19 +667,19 @@
    * Result: <a href="#/admin/groups/1/users/7">Label</a>
    */
 
-  kdNavModule.directive('kdNavPath', [
-    'kdNav', function(kdNav) {
+  ngCompassModule.directive('ngCompassPath', [
+    'ngCompass', function(ngCompass) {
       var directive;
       directive = {
         restrict: 'A',
         scope: {
-          routeName: '@kdNavPath',
-          params: '=kdNavParams'
+          routeName: '@ngCompassPath',
+          params: '=ngCompassParams'
         },
         link: function(scope, el, attr) {
           var updateHref;
           updateHref = function() {
-            return attr.$set('href', "#" + (kdNav.createPath(scope.routeName, scope.params)));
+            return attr.$set('href', "#" + (ngCompass.createPath(scope.routeName, scope.params)));
           };
           return scope.$watch('params', updateHref, true);
         }
