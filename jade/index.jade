@@ -9,7 +9,9 @@ html(lang='en')
   body(ng-app='myApp')
     //- Home Template
     script(type='text/ng-template', id='home.html')
-      h2 How we did define the main menu?
+      h2 ngCompass
+      p ngCompass provides breadcrumbs, menus and linking-directives for AngularJS 1.2/1.3.
+      h3 How did we define the main menu?
       h5 Jade
       pre(ng-non-bindable) ul(ng-compass-menu='mainMenu')
         |   li(ng-repeat='item in menu')
