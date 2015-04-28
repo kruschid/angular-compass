@@ -9,12 +9,7 @@
   </head>
   <body ng-app="myApp">
     <script type="text/ng-template" id="home.html">
-      <h2>ngCompass demo </h2>
-      <h4>Demos</h4>
-      <ul ng-compass-menu="mainMenu">
-        <li ng-repeat="item in menu"><a ng-compass-path="{{item.routeName}}" ng-compass-params="item.params">{{item.label}}</a></li>
-      </ul>
-      <h4>How we did define the menu above</h4>
+      <h2>How we did define the main menu?</h2>
       <h5>Jade</h5>
       <pre ng-non-bindable>ul(ng-compass-menu='mainMenu')
   li(ng-repeat='item in menu')
@@ -37,6 +32,14 @@
   {routeName:'links'}
   {routeName:'menus'}
 ])</pre>
+      <p>
+        In this case 'mainMenu' is just a name to reference the menu.
+        Of course you can use a different name like 'myMenu' for your custom Menus.
+      </p>
+      <p>
+        You can also generate am dynamic menu from some datasets.
+        In that case you would consider to <a ng-compass-path="menus">define a menu in a controller.</a>
+      </p>
     </script>
     <script type="text/ng-template" id="breadcrumbs.html">
       <h2>ngCompass breadcrumbs</h2>
@@ -116,7 +119,7 @@ ngCompass.createPath('subSubMenus', {menuId: 1, subMenuId:7, searchABC:'#kung/fo
     </script>
     <script type="text/ng-template" id="menus.html">
       <h1>Overview</h1>
-      <h3>Example</h3>
+      <h3>Demo</h3>
       <div ng-compass-menu="extraMenu">
         <ul class="nav nav-tabs">
           <li ng-repeat="item in menu" ng-class="{active: item.active}"><a ng-compass-path="{{item.routeName}}" ng-compass-params="item.params">{{item.label}}</a></li>
@@ -200,7 +203,7 @@ $scope.code = $routeParams.code</pre>
     </div>
     <script src="lib/angular/angular.js"></script>
     <script src="lib/angular-route/angular-route.js"></script>
-    <script src="../src/js/angular-compass.js"></script>
+    <script src="js/angular-compass.js"></script>
     <script src="js/app.js"></script>
   </body>
 </html>

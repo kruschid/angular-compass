@@ -8,7 +8,7 @@ module.exports = (grunt) ->
       install:
         options:
           layout: 'byComponent'
-          targetDir: "demo/lib"
+          targetDir: "lib"
           cleanup: true # both cleanBowerDir & cleanTargetDir are set to the value of cleanup.
     #
     # jade
@@ -17,14 +17,14 @@ module.exports = (grunt) ->
         options:
           pretty: true
         files:
-          'demo/index.html': 'demo/jade/*.jade'
+          'index.html': 'jade/index.jade'
     #
     # coffeescript
     coffee:
       compile:
         files: {
-          'demo/js/app.js': 'demo/coffee/*.coffee'
-          'src/js/angular-compass.js': 'src/coffee/*.coffee'
+          'js/app.js': 'coffee/app.coffee'
+          'js/angular-compass.js': 'coffee/angular-compass.coffee'
         }
     #
     # documentation generator
@@ -33,29 +33,21 @@ module.exports = (grunt) ->
     #     basePath: './dist/javascripts'
     #   src: ['angular-kdnav.js']
     #   dest: 'api'
-    #
-    # uglify
-    uglify:
-      options:
-        compress:
-          drop_console: true # remove console warnings: every command starts with console.*
-      kdNav:
-        files:
-          'src/js/angular-compass.min.js': ['src/js/angular-compass.js']
+
     #
     # watch
     watch:
       jade:
-        files: ['demo/jade/*']
+        files: ['jade/*']
         tasks: ['jade']
       coffee:
-        files: ['src/coffee/*', 'demo/coffee/*']
+        files: ['coffee/*']
         tasks: ['coffee'] 
       # dgeni:
       #   files: ['dist/javascripts/angular-kdnav.js']
       #   tasks: ['dgeni']
       livereload:
-        files: ['src/js/*', 'demo/js/*', 'demo/*']
+        files: ['js/*', 'index.html']
         options:
           livereload: true
 
