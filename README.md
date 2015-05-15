@@ -1,9 +1,9 @@
-##Install
+## Installation
 Just open the terminal and run:
 
 	bower install angular-compass --save
 	
-Or add `"angular-compass":"0.4.0"` to your dependencies in `bower.json`.
+Or add `"angular-compass":"latest"` to your dependencies in `bower.json`.
 
 ## Demo
 https://kruschid.github.io/angular-compass
